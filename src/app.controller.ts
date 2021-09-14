@@ -157,18 +157,22 @@ export class AppController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('subscribe/prices')
   @ApiOperation({
     summary: 'Get live prices every 5 minutes',
   })
+  @ApiBearerAuth('accessToken')
   subscribeForPriceNotification() {
     return this.portfolioService.subscribeForPriceNotification();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('unsubscribe/prices')
   @ApiOperation({
     summary: 'Get live prices every 5 minutes',
   })
+  @ApiBearerAuth('accessToken')
   unsubscribeForPriceNotification() {
     return this.portfolioService.unsubscribeForPriceNotification();
   }
