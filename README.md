@@ -1,6 +1,6 @@
 ## Description
 
-Stocks Tracking Portfolio (Backend)
+Stockify (Backend)
 
 ## Installation
 

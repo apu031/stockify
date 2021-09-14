@@ -7,8 +7,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const options = new DocumentBuilder()
-    .setTitle('Stocks Sanctuary')
-    .setDescription('API Documents for Stocks Sanctuary')
+    .setTitle('Stockify')
+    .setDescription('API Documents for Stockify')
     .setVersion('1.0')
     .addTag('Stock Sanctuary')
     .addBearerAuth(
