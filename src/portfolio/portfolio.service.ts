@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PortfolioEntity } from '../entities/portfolio.entity';
 import { mockStocks } from '../mocks/mock-stocks';
+import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 
 export type Portfolio = any;
 
@@ -13,6 +14,7 @@ export class PortfolioService {
   constructor(
     @InjectRepository(PortfolioEntity)
     private readonly portfolioRepo: Repository<PortfolioEntity>,
+    private schedulerRegistry: SchedulerRegistry,
   ) {}
 
   async createPortfolio(userId: string) {
@@ -125,5 +127,21 @@ export class PortfolioService {
     portf.walletBalance += quantity * mockStocks[stock].rate;
 
     return this.portfolioRepo.update(portf.portfolioId, portf);
+  }
+
+  @Cron(CronExpression.EVERY_30_SECONDS, {
+    name: 'priceNotification',
+  })
+  private triggerPriceNotification() {
+    console.log('called every 5 minutes to show prices');
+  }
+
+  subscribeForPriceNotification() {
+    const job = this.schedulerRegistry.getCronJob('priceNotification');
+    job.start();
+  }
+  unsubscribeForPriceNotification() {
+    const job = this.schedulerRegistry.getCronJob('priceNotification');
+    job.stop();
   }
 }

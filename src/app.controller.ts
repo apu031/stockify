@@ -156,4 +156,20 @@ export class AppController {
       fundWalletDto.fund,
     );
   }
+
+  @Get('subscribe/prices')
+  @ApiOperation({
+    summary: 'Get live prices every 5 minutes',
+  })
+  subscribeForPriceNotification() {
+    return this.portfolioService.subscribeForPriceNotification();
+  }
+
+  @Get('unsubscribe/prices')
+  @ApiOperation({
+    summary: 'Get live prices every 5 minutes',
+  })
+  unsubscribeForPriceNotification() {
+    return this.portfolioService.unsubscribeForPriceNotification();
+  }
 }
