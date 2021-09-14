@@ -1,49 +1,110 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Stocks Tracking Portfolio (Backend)
 
 ## Installation
 
 ```bash
-$ npm install
+# install all the packages
+$ npm i
 ```
 
 ## Running the app
 
 ```bash
-# development
-$ npm run start
-
 # watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+$ docker compose up
 ```
+
+```bash
+# wait until container are fully up,
+# and the app was able to to connect to postgres
+# then open your terminal and write the two commands
+
+# for migration,
+$ docker exec stocks sh -c "npm run typeorm:migration:run"
+# for seeding,
+$ docker exec stocks sh -c "npm run typeorm:seed:run"
+```
+
+The APIs can be tested with the swagger-express-ui
+```bash
+# go to the following url
+http://localhost:3000/api-docs 
+```
+
+1. You can either register a new user or use an existing user
+* try /auth/login and fill out the following request body
+```
+{
+  "username": test1
+  "password": test1
+}
+```
+* copy the jwt access token from the response "ey......"
+* At the top right corner swagger has a button called "Authorize"
+* click on the button and paste the token when prompted. You token is valid for 500 seconds
+* You can now perform other endpoint tasks
+
+2. You can view your profile:
+* try /profile
+```
+{
+  "userId": "314c7707-2493-4a6e-9bc0-b021f6a28d7d",
+  "username": "test1"
+}
+```
+
+3. You can view your portfolio:
+* try /portfolio
+```
+{
+  "portfolioId": "ceee4fa0-e163-417f-9c59-bc32aced4999",
+  "userId": "314c7707-2493-4a6e-9bc0-b021f6a28d7d",
+  "walletBalance": "14080",
+  "bought": "{\"STAN\":2}",
+  "sold": "{\"STAN\":1}",
+  "current": "{\"STAN\":1}",
+  "createdTs": "2021-09-14T02:56:31.364Z",
+  "updatedTs": "2021-09-14T02:56:31.364Z"
+}
+```
+
+4. You can fund your wallet:
+* try /fund and fill out the request body:
+```
+{
+  "fund": 300
+}
+```
+* Your wallet should be funded, and you can check it
+through /portfolio
+  
+5. To buy stocks:
+* try /buy/:stocks endpoint.
+* choose the available stocks from the drop-down,
+it will automatically fill in the parameter portion of the url
+* Fill the request body too with how many shares you want to buy
+```
+{
+  "quantity": 2
+}
+```
+* Upon successful transaction, you can check it
+  through /portfolio
+
+5. To sell stocks:
+* try /sell/:stocks endpoint.
+* choose the available stocks from the drop-down,
+  it will automatically fill in the parameter portion of the url
+* Fill the request body too with how many shares you want to sell
+```
+{
+  "quantity": 1
+}
+```
+* Upon successful transaction, you can check it
+  through /portfolio
 
 ## Test
 
