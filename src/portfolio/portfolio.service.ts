@@ -1,69 +1,129 @@
 import { Injectable } from '@nestjs/common';
+import { StocksSymbol } from '../enums/stock-symbol.enum';
+import { errorMessage } from '../enums/error-messages';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { PortfolioEntity } from '../entities/portfolio.entity';
+import { mockStocks } from '../mocks/mock-stocks';
 
 export type Portfolio = any;
 
-export enum StocksSymbol {
-  STAN = 'STAN',
-  MGX = 'MGX',
-}
-
 @Injectable()
 export class PortfolioService {
-  private readonly portfolios = [
-    {
-      userId: 1,
-      walletBalance: 10,
-      bought: {},
-      sold: {},
-    },
-    {
-      userId: 2,
-      walletBalance: 5,
-      bought: {},
-      sold: {},
-    },
-  ];
+  constructor(
+    @InjectRepository(PortfolioEntity)
+    private readonly portfolioRepo: Repository<PortfolioEntity>,
+  ) {}
 
-  private readonly stocks = {
-    STAN: {
-      stockId: 1,
-      stockSymbol: StocksSymbol.STAN,
-      rate: 100,
-    },
-    MGX: {
-      stockId: 2,
-      stockSymbol: StocksSymbol.MGX,
-      rate: 50,
-    },
-  };
+  async createPortfolio(userId: string) {
+    return this.portfolioRepo.save({ userId });
+  }
 
-  async getPortfolioByUserId(userId: number): Promise<Portfolio | undefined> {
-    return this.portfolios.find((portfolio) => portfolio.userId === userId);
+  async getPortfolioByUserId(userId: string): Promise<Portfolio | undefined> {
+    return this.portfolioRepo.findOne({ userId });
+  }
+
+  async fundWalletByUserId(
+    userId: string,
+    fund: number,
+  ): Promise<Portfolio | undefined> {
+    const portf = await this.portfolioRepo.findOne({ userId });
+
+    if (!portf) {
+      throw new Error(errorMessage.invalid_user);
+    }
+
+    if (fund <= 0) {
+      throw new Error(errorMessage.invalid_fund);
+    }
+
+    portf.walletBalance += fund;
+
+    return this.portfolioRepo.update(portf.portfolioId, portf);
   }
 
   async buyStocks(
-    userId: number,
-    stock,
+    userId: string,
+    stock: StocksSymbol,
     quantity: number,
   ): Promise<Portfolio | undefined> {
-    const portf = this.portfolios.find(
-      (portfolio) => portfolio.userId === userId,
-    );
+    const portf = await this.portfolioRepo.findOne({ userId });
+
+    if (!portf) {
+      throw new Error(errorMessage.invalid_user);
+    }
+
+    if (quantity <= 0) {
+      throw new Error(errorMessage.invalid_stock_quantity);
+    }
+
+    const newBalance = portf.walletBalance - quantity * mockStocks[stock].rate;
+    if (newBalance < 0) {
+      throw new Error(errorMessage.not_enough_balance);
+    } else {
+      portf.walletBalance = newBalance;
+    }
+
+    const boughtStocks = JSON.parse(portf.bought);
+    const sellStocks = JSON.parse(portf.sold);
+    const currentStocks = JSON.parse(portf.current);
+
+    if (currentStocks[stock] !== undefined) {
+      boughtStocks[stock] += quantity;
+      currentStocks[stock] = boughtStocks[stock] - sellStocks[stock];
+    } else {
+      boughtStocks[stock] = quantity;
+      currentStocks[stock] = boughtStocks[stock];
+    }
+
+    portf.bought = JSON.stringify(boughtStocks);
+    portf.sold = JSON.stringify(sellStocks);
+    portf.current = JSON.stringify(currentStocks);
+
+    return this.portfolioRepo.update(portf.portfolioId, portf);
+  }
+
+  async sellStocks(
+    userId: string,
+    stock: StocksSymbol,
+    quantity: number,
+  ): Promise<Portfolio | undefined> {
+    const portf = await this.portfolioRepo.findOne({ userId });
 
     if (!portf) {
       return;
     }
 
-    if (portf.bought[stock] !== undefined) {
-      portf.bought[stock] = portf.bought[stock] + quantity;
-    } else {
-      portf.bought[stock] = quantity;
+    if (!portf) {
+      throw new Error(errorMessage.invalid_user);
     }
-    portf.walletBalance =
-      portf.walletBalance - quantity * this.stocks[stock].rate;
 
-    console.log('updated:', portf);
+    if (quantity <= 0) {
+      throw new Error(errorMessage.invalid_stock_quantity);
+    }
 
-    return portf;
+    const boughtStocks = JSON.parse(portf.bought);
+    const sellStocks = JSON.parse(portf.sold);
+    const currentStocks = JSON.parse(portf.current);
+
+    if (currentStocks[stock] === undefined) {
+      throw new Error(errorMessage.stock_is_unavailable);
+    }
+
+    if (sellStocks[stock] !== undefined) {
+      sellStocks[stock] = sellStocks[stock] + quantity;
+    } else {
+      sellStocks[stock] = quantity;
+    }
+
+    currentStocks[stock] = boughtStocks[stock] - sellStocks[stock];
+
+    portf.bought = JSON.stringify(boughtStocks);
+    portf.sold = JSON.stringify(sellStocks);
+    portf.current = JSON.stringify(currentStocks);
+
+    portf.walletBalance += quantity * mockStocks[stock].rate;
+
+    return this.portfolioRepo.update(portf.portfolioId, portf);
   }
 }

@@ -18,7 +18,16 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "pretypeorm": "(rm -f src/orm-config/ormconfig-stocks.json) && (rm -f src/orm-config/ormconfig-stocks-seed.json) && ts-node -r tsconfig-paths/register src/orm-config/generate-ormconfig-json.ts",
+    "typeorm": "ts-node ./node_modules/typeorm/cli.js",
+    "typeorm:migration:create": "npm run typeorm -- migration:create -f src/orm-config/ormconfig-stocks.json -n",
+    "typeorm:migration:generate": "npm run typeorm -- migration:generate -f src/orm-config/ormconfig-stocks.json -n",
+    "typeorm:migration:run": "npm run typeorm -- migration:run -f src/orm-config/ormconfig-stocks.json",
+    "typeorm:migration:revert": "npm run typeorm -- migration:revert -f src/orm-config/ormconfig-stocks.json",
+
+    "typeorm:seed:create": "npm run typeorm -- migration:create -f src/orm-config/ormconfig-stocks-seed.json -n",
+    "typeorm:seed:run": "npm run typeorm -- migration:run -f src/orm-config/ormconfig-stocks-seed.json"
   },
   "dependencies": {
     "@nestjs/common": "^7.6.15",
@@ -26,12 +35,15 @@
     "@nestjs/jwt": "^8.0.0",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^7.6.15",
+    "@nestjs/typeorm": "^7.1.5",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
+    "pg": "^8.7.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^6.6.6"
+    "rxjs": "^6.6.6",
+    "typeorm": "^0.2.28"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.6.0",

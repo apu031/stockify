@@ -1,0 +1,22 @@
+{
+  "type": "postgres",
+  "host": "postgres",
+  "port": 5432,
+  "username": "stocs",
+  "password": "stocks",
+  "database": "stocks",
+  "entities": [
+    "/usr/src/app/src/orm-config/**/*.entity.{ts,js}",
+    "./dist/**/*.entity.{ts,js}"
+  ],
+  "synchronize": false,
+  "migrationsRun": false,
+  "logger": "simple-console",
+  "migrationsTableName": "seed",
+  "migrations": [
+    "dist/seeds/*js"
+  ],
+  "cli": {
+    "migrationsDir": "src/seeds"
+  }
+}

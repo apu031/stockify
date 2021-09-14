@@ -1,0 +1,27 @@
+version: '3.2'
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: 'stocks'
+      POSTGRES_USER: 'stocs'
+      POSTGRES_PASSWORD: 'stocks'
+    ports:
+      - 5432:5432
+
+  stocks:
+    container_name: stocks
+    build:
+      context: .
+    env_file:
+      - .env-dev
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev
