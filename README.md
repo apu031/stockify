@@ -105,6 +105,10 @@ it will automatically fill in the parameter portion of the url
 ```
 * Upon successful transaction, you can check it
   through /portfolio
+  
+6. To subscribe for stock prices, a cron job is created with nestjs
+task scheduler. However, for now, it just prints the console.log in docker console.
+   * try /subscribe/prices and /unsubscribe/prices
 
 ## Test
 
